@@ -13,6 +13,7 @@ const HomePage = () => {
   const [search, setSearch] = useState("");
   const [vehicleType, setVehicleType] = useState("All");
   const [tyreType, setTyreType] = useState("All");
+  const [brand, setBrand] = useState("All");
 
   useEffect(() => {
     const fetchTyres = async () => {
@@ -29,35 +30,47 @@ const HomePage = () => {
     fetchTyres();
   }, []);
 
+  /* ---------- FILTER LOGIC ---------- */
+
   useEffect(() => {
     let data = tyres;
 
+    // Search filter
     if (search) {
       data = data.filter(
         (t) =>
           t.name?.toLowerCase().includes(search.toLowerCase()) ||
-          t.brand?.toLowerCase().includes(search.toLowerCase())
+          t.tyreBrand?.toLowerCase().includes(search.toLowerCase())
       );
     }
 
+    // Vehicle type filter
     if (vehicleType !== "All") {
       data = data.filter((t) => t.vehicleType === vehicleType);
     }
 
+    // Tyre type filter
     if (tyreType !== "All") {
       data = data.filter((t) => t.tyreType === tyreType);
     }
 
-    setFilteredTyres(data);
-  }, [search, vehicleType, tyreType, tyres]);
+    // Brand filter
+    if (brand !== "All") {
+      data = data.filter((t) => t.tyreBrand === brand);
+    }
 
-  /* ---------- BRAND COUNT LOGIC ---------- */
+    setFilteredTyres(data);
+  }, [search, vehicleType, tyreType, brand, tyres]);
+
+  /* ---------- BRAND COUNT ---------- */
 
   const brandCount = tyres.reduce((acc, tyre) => {
     const brand = tyre.tyreBrand || "Unknown";
     acc[brand] = (acc[brand] || 0) + 1;
     return acc;
   }, {});
+
+  const brands = Object.keys(brandCount);
 
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
@@ -98,8 +111,6 @@ const HomePage = () => {
               {tyres.length}
             </h2>
 
-            <div className="mt-4 h-[2px] w-24 bg-gradient-to-r from-yellow-500 to-transparent"></div>
-
           </div>
 
           {/* Brand Breakdown */}
@@ -117,13 +128,8 @@ const HomePage = () => {
                   key={brand}
                   className="flex justify-between items-center px-3 py-2 rounded-md bg-black/40 border border-neutral-800 hover:border-yellow-500 transition"
                 >
-                  <span className="text-neutral-300">
-                    {brand}
-                  </span>
-
-                  <span className="text-yellow-400 font-semibold">
-                    {count}
-                  </span>
+                  <span className="text-neutral-300">{brand}</span>
+                  <span className="text-yellow-400 font-semibold">{count}</span>
 
                 </div>
 
@@ -138,31 +144,56 @@ const HomePage = () => {
         {/* FILTER BAR */}
         <div className="mb-12 p-6 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-xl">
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
 
-            {/* Vehicle Type */}
+            {/* SEARCH */}
+            <input
+              type="text"
+              placeholder="Search tyre by name or brand..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="px-4 py-3 rounded-lg bg-black border border-neutral-700 focus:border-yellow-500 outline-none"
+            />
+
+            {/* VEHICLE TYPE */}
             <select
-              className="px-4 py-3 rounded-lg bg-black border border-neutral-700 focus:border-yellow-500 transition-all"
               value={vehicleType}
               onChange={(e) => setVehicleType(e.target.value)}
+              className="px-4 py-3 rounded-lg bg-black border border-neutral-700 focus:border-yellow-500"
             >
-              <option value="All">All Vehicle Types</option>
+              <option value="All">All Vehicles</option>
               <option value="Car">Car</option>
               <option value="Bike">Bike</option>
               <option value="Truck">Truck</option>
               <option value="Bus">Bus</option>
             </select>
 
-            {/* Tyre Type */}
+            {/* TYRE TYPE */}
             <select
-              className="px-4 py-3 rounded-lg bg-black border border-neutral-700 focus:border-yellow-500 transition-all"
               value={tyreType}
               onChange={(e) => setTyreType(e.target.value)}
+              className="px-4 py-3 rounded-lg bg-black border border-neutral-700 focus:border-yellow-500"
             >
               <option value="All">All Tyre Types</option>
               <option value="Tubeless">Tubeless</option>
               <option value="Tube">Tube</option>
               <option value="Radial">Radial</option>
+            </select>
+
+            {/* BRAND FILTER */}
+            <select
+              value={brand}
+              onChange={(e) => setBrand(e.target.value)}
+              className="px-4 py-3 rounded-lg bg-black border border-neutral-700 focus:border-yellow-500"
+            >
+              <option value="All">All Brands</option>
+
+              {brands.map((b) => (
+                <option key={b} value={b}>
+                  {b}
+                </option>
+              ))}
+
             </select>
 
           </div>
